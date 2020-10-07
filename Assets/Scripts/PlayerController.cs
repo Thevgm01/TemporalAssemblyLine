@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public Transform _camera;
     public float lookSensetivity;
 
     public float walkSpeed;
@@ -12,6 +13,7 @@ public class PlayerController : MonoBehaviour
     //public float maxSpeed;
     public float speedDecay;
     public float jumpForce;
+    private bool jumping = false;
 
     float angleX = 0f;
     float angleY = 0f;
@@ -25,14 +27,24 @@ public class PlayerController : MonoBehaviour
     FootCollider feet;
     Transform head;
     Collider body;
-    Collider arm;
-    List<Collider> armTargets;
-    Rigidbody armTarget;
 
-    private bool jumping = false;
+    [Header("Grabbing")]
+    [SerializeField]
+    [Range(0f, 5f)]
+    float maxGrabDistance = 3f;
+    [SerializeField]
+    [Range(0f, 5f)]
+    float maxGrabSpeed = 2f;
+    [SerializeField]
+    [Range(0f, 30f)]
+    float grabForce = 10f;
+    [SerializeField]
+    LayerMask grabLayer;
+    private float holdDistance;
+    private Rigidbody currentGrabbedRB;
 
-    // Use this for initialization
-    void Start()
+
+    void Awake()
     {
         curSpeed = Vector3.zero;
 
@@ -40,23 +52,9 @@ public class PlayerController : MonoBehaviour
 
         body = GetComponent<Collider>();
 
-        foreach (Transform child in transform)
-        {
-            if (child.tag == "PlayerHead")
-            {
-                head = child;
-                foreach (Transform subchild in head.transform)
-                {
-                    if (subchild.tag == "PlayerArm")
-                    {
-                        arm = subchild.GetComponent<Collider>();
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-        armTargets = new List<Collider>();
+        head = transform.Find("Head");
+
+        handIcon.SetState(HandIconManager.State.HIDDEN);
 
         var feetObject = Instantiate(footCollider);
         var feetFollow = feetObject.GetComponent<FollowObject>();
@@ -65,7 +63,6 @@ public class PlayerController : MonoBehaviour
         feet = feetObject.GetComponent<FootCollider>();
         var feetCollider = feetObject.GetComponent<Collider>();
         Physics.IgnoreCollision(body, feetCollider, true);
-        Physics.IgnoreCollision(arm, feetCollider, true);
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -95,35 +92,37 @@ public class PlayerController : MonoBehaviour
             curSpeed += newMove;
         }
 
-        // Grabbing
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (armTarget == null)
+        HandleGrab();
+    }
+
+    void HandleGrab()
+    {
+        if (currentGrabbedRB == null) {
+            Physics.Raycast(_camera.position, _camera.forward, out var ray, maxGrabDistance, grabLayer);
+            Rigidbody colliderRB;
+            if (ray.collider != null && (colliderRB = ray.collider.GetComponent<Rigidbody>()) != null)
             {
-                Rigidbody closest = null;
-                foreach (Collider c in armTargets)
+                if (Input.GetMouseButtonDown(0))
                 {
-                    var rb = c.GetComponent<Rigidbody>();
-                    if (rb != null && !rb.isKinematic)
-                    {
-                        if (closest == null || Vector3.Distance(head.position, rb.transform.position) < Vector3.Distance(head.position, closest.transform.position))
-                            closest = rb;
-                    }
+                    Grab(colliderRB);
+                    holdDistance = ray.distance;
+                    handIcon.SetState(HandIconManager.State.CLOSED);
                 }
-                if (closest != null)
+                else
                 {
-                    Grab(closest);
+                    handIcon.SetState(HandIconManager.State.OPEN);
                 }
             }
-            else if ((armTarget.position - transform.position).sqrMagnitude > 1)
+            else
             {
-                Drop();
+                handIcon.SetState(HandIconManager.State.HIDDEN);
             }
         }
-
-        if (armTarget != null) handIcon.Close();
-        else if (armTargets.Count > 0) handIcon.Open();
-        else handIcon.Hide();
+        else if(Input.GetMouseButtonDown(0))
+        {
+            Release();
+            handIcon.SetState(HandIconManager.State.OPEN);
+        }
     }
 
     void FixedUpdate()
@@ -151,33 +150,40 @@ public class PlayerController : MonoBehaviour
             curSpeed = Vector3.zero;
         }
 
-        if (armTarget != null)
+        if (currentGrabbedRB != null)
         {
-            Vector3 posDif = arm.transform.position - armTarget.position;
-            armTarget.AddForce(posDif * (posDif.sqrMagnitude + 1f) * 10f);
-            armTarget.velocity *= 0.9f;
+            Vector3 posDif = head.transform.position + (head.transform.forward * holdDistance) - currentGrabbedRB.position;
+            currentGrabbedRB.AddForce(posDif * posDif.sqrMagnitude * grabForce);
+            currentGrabbedRB.velocity *= 0.9f;
+
+            if (currentGrabbedRB.velocity.magnitude > maxGrabSpeed)
+                currentGrabbedRB.velocity = currentGrabbedRB.velocity.normalized * maxGrabSpeed;
 
             //armTarget.MoveRotation(Quaternion.Euler(0f, angleX, 0f));
-            armTarget.angularVelocity = Vector3.zero;
+            currentGrabbedRB.angularVelocity *= 0.9f;
         }
     }
 
     void Grab(Rigidbody rb)
     {
-        armTarget = rb;
-
-        armTarget.useGravity = false;
-        Physics.IgnoreCollision(body, armTarget.GetComponent<Collider>(), true);
+        currentGrabbedRB = rb;
+        currentGrabbedRB.useGravity = false;
+        Physics.IgnoreCollision(body, currentGrabbedRB.GetComponent<Collider>(), true);
     }
 
-    void Drop()
+    void Release()
     {
-        armTarget.useGravity = true;
-        Physics.IgnoreCollision(body, armTarget.GetComponent<Collider>(), false);
-
-        armTarget = null;
+        StartCoroutine("EnableCollisionsOnExit", currentGrabbedRB.GetComponent<Collider>());
+        currentGrabbedRB.useGravity = true;
+        currentGrabbedRB = null;
     }
 
-    void OnTriggerEnter(Collider c) { if (c.tag == "Grabbable") armTargets.Add(c); }
-    void OnTriggerExit(Collider c) { armTargets.Remove(c); }
+    IEnumerator EnableCollisionsOnExit(Collider grabbedCollider)
+    {
+        while (body.bounds.Intersects(grabbedCollider.bounds))
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        Physics.IgnoreCollision(body, grabbedCollider.GetComponent<Collider>(), false);
+    }
 }
