@@ -29,6 +29,8 @@ public class MovementController : MonoBehaviour
     [HideInInspector]
     public Vector3 forceNextFrame;
 
+    private Vector3 lastPosition;
+
     void Awake()
     {
         forceNextFrame = Vector3.zero;
@@ -39,6 +41,8 @@ public class MovementController : MonoBehaviour
 
     void FixedUpdate()
     {
+        lastPosition = transform.position;
+
         if (forceNextFrame != Vector3.zero)
         {
             float speed = walkSpeed;
@@ -47,8 +51,7 @@ public class MovementController : MonoBehaviour
             {
                 if (sprinting) speed *= sprintSpeedMult;
                 forceNextFrame *= (1f - speedDecay);
-                if (forceNextFrame.sqrMagnitude < 0.0001f) forceNextFrame = Vector3.zero;
-                else _rb.MovePosition(transform.position + forceNextFrame * speed);
+                _rb.MovePosition(transform.position + forceNextFrame * speed);
             }
             else
             {
@@ -69,6 +72,8 @@ public class MovementController : MonoBehaviour
     public void Jump()
     {
         if (!_feet.isGrounded) return;
-        _rb.velocity = new Vector3(_rb.velocity.x, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), _rb.velocity.z);
+        _rb.velocity = new Vector3
+            (_rb.velocity.x, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), _rb.velocity.z);// +
+            //(forceNextFrame * 1000 * Time.fixedDeltaTime * walkSpeed * (sprinting ? sprintSpeedMult : 0));
     }
 }
