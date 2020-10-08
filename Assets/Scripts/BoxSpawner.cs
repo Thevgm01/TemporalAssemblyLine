@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class BoxSpawner : MonoBehaviour
 {
-
     public GameObject box;
     public float frequency;
 

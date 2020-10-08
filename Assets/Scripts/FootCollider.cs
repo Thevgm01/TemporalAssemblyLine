@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class FootCollider : MonoBehaviour
 {
-    int grounded = 0;
+    private int _grounded = 0;
 
-    public bool Grounded()
+    public bool isGrounded
     {
-        return grounded > 0;
+        get => _grounded > 0;
     }
 
     void OnTriggerEnter(Collider c)
     {
-        grounded++;
+        _grounded++;
     }
 
     void OnTriggerExit(Collider c)
     {
-        grounded--;
+        _grounded--;
     }
 
 }

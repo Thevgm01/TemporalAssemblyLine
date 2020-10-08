@@ -12,9 +12,14 @@ public class HandIconManager : MonoBehaviour
 
     UnityEngine.UI.RawImage img;
 
-    public void SetState(State newState)
+    public void Open() { SetState(State.OPEN); }
+    public void Close() { SetState(State.CLOSED); }
+    public void Hide() { SetState(State.HIDDEN); }
+
+    void SetState(State newState)
     {
         if (img == null) img = GetComponent<UnityEngine.UI.RawImage>();
+
         if (curState == newState) return;
         else if(newState == State.OPEN)
         {
