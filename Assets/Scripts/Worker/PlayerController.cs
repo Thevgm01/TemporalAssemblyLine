@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
             _movement.Sprint(false);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
             if (_feet.isGrounded) _movement.Jump();
         }

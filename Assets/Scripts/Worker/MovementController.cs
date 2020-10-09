@@ -29,7 +29,7 @@ public class MovementController : MonoBehaviour
     [HideInInspector]
     public Vector3 forceNextFrame;
 
-    private Vector3 lastPosition;
+    private Vector3 lastGroundPosition;
 
     void Awake()
     {
@@ -37,11 +37,13 @@ public class MovementController : MonoBehaviour
 
         _rb = GetComponent<Rigidbody>();
         _feet = GetComponentInChildren<FootCollider>();
+
+        _feet.landed += Land;
     }
 
     void FixedUpdate()
     {
-        lastPosition = transform.position;
+        lastGroundPosition = _rb.position;
 
         if (forceNextFrame != Vector3.zero)
         {
@@ -51,12 +53,15 @@ public class MovementController : MonoBehaviour
             {
                 if (sprinting) speed *= sprintSpeedMult;
                 forceNextFrame *= (1f - speedDecay);
-                _rb.MovePosition(transform.position + forceNextFrame * speed);
+                if (forceNextFrame.sqrMagnitude < 0.0001f) forceNextFrame = Vector3.zero;
+                else _rb.MovePosition(_rb.position + forceNextFrame * speed);
             }
             else
             {
                 Vector3 currentLateralVelocity = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
-                speed *= airSpeedMult.Evaluate(currentLateralVelocity.magnitude);
+                float dotProduct = Vector3.Dot(currentLateralVelocity.normalized, forceNextFrame.normalized);
+                float speedMult = airSpeedMult.Evaluate(currentLateralVelocity.magnitude * dotProduct);
+                speed *= speedMult;
 
                 _rb.AddForce(forceNextFrame * speed * 1000);
                 forceNextFrame = Vector3.zero;
@@ -71,9 +76,16 @@ public class MovementController : MonoBehaviour
 
     public void Jump()
     {
-        if (!_feet.isGrounded) return;
+        if (jumping) return;
         _rb.velocity = new Vector3
-            (_rb.velocity.x, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), _rb.velocity.z);// +
-            //(forceNextFrame * 1000 * Time.fixedDeltaTime * walkSpeed * (sprinting ? sprintSpeedMult : 0));
+            (0, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), 0) +
+            (_rb.position - lastGroundPosition) / Time.fixedDeltaTime;
+        jumping = true;
+    }
+
+    void Land()
+    {
+        lastGroundPosition = _rb.position;
+        jumping = false;
     }
 }
