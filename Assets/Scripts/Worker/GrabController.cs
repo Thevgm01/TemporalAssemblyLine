@@ -6,9 +6,9 @@ using System;
 public class GrabController : MonoBehaviour
 {
     public Action cannotGrab = delegate { };
-    public Action canGrab = delegate { };
-    public Action grabbed = delegate { };
-    public Action letGo = delegate { };
+    public Action<Transform> canGrab = delegate { };
+    public Action<Transform> grabbed = delegate { };
+    public Action<Transform> letGo = delegate { };
 
     Transform _head;
     Collider _body;
@@ -52,14 +52,14 @@ public class GrabController : MonoBehaviour
 
             if (ray.collider != null) // Looking at an object in the grabbable layer
             {
-                holdDistance = ray.distance;
+                holdDistance = Vector3.Distance(_head.position, ray.collider.transform.position);
                 if (currentLookRB == null || // Wasn't looking at any object last frame, or...
                     ray.collider.gameObject != currentLookRB.gameObject) // Looking at a different object this frame)
                 {
                     try
                     {
                         currentLookRB = ray.collider.GetComponent<Rigidbody>();
-                        canGrab?.Invoke();
+                        canGrab?.Invoke(currentLookRB.transform);
                     }
                     catch (Exception e)
                     {
@@ -98,17 +98,17 @@ public class GrabController : MonoBehaviour
         currentGrabRB = currentLookRB;
         currentGrabRB.useGravity = false;
         Physics.IgnoreCollision(_body, currentGrabRB.GetComponent<Collider>(), true);
+        grabbed?.Invoke(currentGrabRB.transform);
         _grabbing = true;
-        grabbed?.Invoke();
     }
 
     public void Release()
     {
+        _grabbing = false;
+        letGo?.Invoke(currentGrabRB.transform);
         StartCoroutine("EnableCollisionsOnExit", currentGrabRB.GetComponent<Collider>());
         currentGrabRB.useGravity = true;
         currentGrabRB = null;
-        _grabbing = false;
-        letGo?.Invoke();
     }
 
     IEnumerator EnableCollisionsOnExit(Collider grabbedCollider)
