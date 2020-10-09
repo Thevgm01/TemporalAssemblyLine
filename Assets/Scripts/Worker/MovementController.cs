@@ -14,7 +14,7 @@ public class MovementController : MonoBehaviour
     [Range(1f, 3f)]
     float sprintSpeedMult = 2f;
     [SerializeField]
-    AnimationCurve airSpeedMult;
+    AnimationCurve airSpeedMult = null;
     //public float maxSpeed;
     [SerializeField]
     [Range(0f, 1f)]

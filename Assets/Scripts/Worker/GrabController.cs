@@ -22,8 +22,7 @@ public class GrabController : MonoBehaviour
     [SerializeField]
     [Range(0f, 30f)]
     float grabForce = 10f;
-    [SerializeField]
-    LayerMask grabLayer;
+    public LayerMask grabLayer;
 
     private float holdDistance;
 
@@ -79,14 +78,16 @@ public class GrabController : MonoBehaviour
     {
         if (currentGrabRB != null)
         {
+
             Vector3 posDif = _head.position + (_head.forward * holdDistance) - currentGrabRB.position;
             currentGrabRB.AddForce(posDif * posDif.sqrMagnitude * grabForce);
-            currentGrabRB.velocity *= 0.9f;
 
             if (currentGrabRB.velocity.magnitude > maxGrabSpeed)
                 currentGrabRB.velocity = currentGrabRB.velocity.normalized * maxGrabSpeed;
 
             //armTarget.MoveRotation(Quaternion.Euler(0f, angleX, 0f));
+
+            currentGrabRB.velocity *= 0.9f;
             currentGrabRB.angularVelocity *= 0.9f;
         }
     }
@@ -97,6 +98,7 @@ public class GrabController : MonoBehaviour
 
         currentGrabRB = currentLookRB;
         currentGrabRB.useGravity = false;
+        //currentGrabRB.interpolation = RigidbodyInterpolation.Extrapolate;
         Physics.IgnoreCollision(_body, currentGrabRB.GetComponent<Collider>(), true);
         grabbed?.Invoke(currentGrabRB.transform);
         _grabbing = true;
@@ -107,6 +109,7 @@ public class GrabController : MonoBehaviour
         _grabbing = false;
         letGo?.Invoke(currentGrabRB.transform);
         StartCoroutine("EnableCollisionsOnExit", currentGrabRB.GetComponent<Collider>());
+        //currentGrabRB.interpolation = RigidbodyInterpolation.None;
         currentGrabRB.useGravity = true;
         currentGrabRB = null;
     }

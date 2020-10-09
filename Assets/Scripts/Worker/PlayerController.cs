@@ -43,7 +43,6 @@ public class PlayerController : MonoBehaviour
         // Looking
         lookAngleX = Mathf.Repeat(lookAngleX + Input.GetAxis("Mouse X") * lookSensetivity, 360f);
         lookAngleY = Mathf.Clamp(lookAngleY - Input.GetAxis("Mouse Y") * lookSensetivity, -90f, 90f);
-        _head.rotation = Quaternion.Euler(lookAngleY, lookAngleX, 0);
 
         float vMov = Input.GetAxisRaw("Vertical"), hMov = Input.GetAxisRaw("Horizontal");
         if (vMov != 0 || hMov != 0)
@@ -72,5 +71,10 @@ public class PlayerController : MonoBehaviour
             if (!_grabber.isGrabbing) _grabber.Grab();
             else _grabber.Release();
         }
+    }
+
+    void LateUpdate()
+    {
+        _head.rotation = Quaternion.Euler(lookAngleY, lookAngleX, 0);
     }
 }
