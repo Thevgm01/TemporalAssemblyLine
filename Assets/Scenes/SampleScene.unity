@@ -6362,7 +6362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2048197440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6377,6 +6377,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 0.65
   sprintSpeedMult: 2
+  sprintSpeedChange: 0.01
   airSpeedMult:
     serializedVersion: 2
     m_Curve:
@@ -6412,6 +6413,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   speedDecay: 0.15
   jumpHeight: 3
+  sprintTime: 0
   forceNextFrame: {x: 0, y: 0, z: 0}
 --- !u!114 &2048197441
 MonoBehaviour:
@@ -6666,6 +6668,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 0.65
   sprintSpeedMult: 2
+  sprintSpeedChange: 0.5
   airSpeedMult:
     serializedVersion: 2
     m_Curve:
@@ -6701,6 +6704,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   speedDecay: 0.15
   jumpHeight: 3
+  sprintTime: 0
   forceNextFrame: {x: 0, y: 0, z: 0}
 --- !u!1 &1380668493102978
 GameObject:

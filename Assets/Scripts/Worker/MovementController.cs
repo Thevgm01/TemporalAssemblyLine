@@ -14,6 +14,9 @@ public class MovementController : MonoBehaviour
     [Range(1f, 3f)]
     float sprintSpeedMult = 2f;
     [SerializeField]
+    [Range(0f, 1f)]
+    float sprintSpeedChange = 0.5f;
+    [SerializeField]
     AnimationCurve airSpeedMult = null;
     //public float maxSpeed;
     [SerializeField]
@@ -23,8 +26,9 @@ public class MovementController : MonoBehaviour
     [Range(0f, 5f)]
     public float jumpHeight = 4f;
 
+    private float sprintTime = 0f;
+
     private bool jumping = false;
-    private bool sprinting = false;
 
     [HideInInspector]
     public Vector3 forceNextFrame;
@@ -51,7 +55,7 @@ public class MovementController : MonoBehaviour
 
             if (_feet.isGrounded)
             {
-                if (sprinting) speed *= sprintSpeedMult;
+                speed *= Mathf.Lerp(1, sprintSpeedMult, sprintTime);
                 forceNextFrame *= (1f - speedDecay);
                 if (forceNextFrame.sqrMagnitude < 0.0001f) forceNextFrame = Vector3.zero;
                 else _rb.MovePosition(_rb.position + forceNextFrame * speed);
@@ -67,11 +71,18 @@ public class MovementController : MonoBehaviour
                 forceNextFrame = Vector3.zero;
             }
         }
+
+        if (sprintTime > 0f)
+        {
+            sprintTime -= Time.fixedDeltaTime / sprintSpeedChange;
+            if (sprintTime < 0f) sprintTime = 0f;
+        }
     }
 
-    public void Sprint(bool val)
+    public void Sprint()
     {
-        sprinting = val;
+        sprintTime += Time.deltaTime * 2 / sprintSpeedChange;
+        if (sprintTime > 1f) sprintTime = 1f;
     }
 
     public void Jump()

@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public struct FrameMovement
+{
+    public float lookAngleX, lookAngleY;
+    public float xMove, yMove;
+    public bool sprint;
+    public bool jump;
+}
+
 public class PlayerController : MonoBehaviour
 {
     public Transform _camera;
@@ -43,6 +51,7 @@ public class PlayerController : MonoBehaviour
         // Looking
         lookAngleX = Mathf.Repeat(lookAngleX + Input.GetAxis("Mouse X") * lookSensetivity, 360f);
         lookAngleY = Mathf.Clamp(lookAngleY - Input.GetAxis("Mouse Y") * lookSensetivity, -90f, 90f);
+        _head.rotation = Quaternion.Euler(lookAngleY, lookAngleX, 0);
 
         float vMov = Input.GetAxisRaw("Vertical"), hMov = Input.GetAxisRaw("Horizontal");
         if (vMov != 0 || hMov != 0)
@@ -52,13 +61,9 @@ public class PlayerController : MonoBehaviour
             _movement.forceNextFrame += newMove * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            _movement.Sprint(true);
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            _movement.Sprint(false);
+            _movement.Sprint();
         }
 
         if (Input.GetKey(KeyCode.Space))
@@ -71,10 +76,5 @@ public class PlayerController : MonoBehaviour
             if (!_grabber.isGrabbing) _grabber.Grab();
             else _grabber.Release();
         }
-    }
-
-    void LateUpdate()
-    {
-        _head.rotation = Quaternion.Euler(lookAngleY, lookAngleX, 0);
     }
 }

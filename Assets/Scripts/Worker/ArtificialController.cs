@@ -26,6 +26,13 @@ public class ArtificialController : MonoBehaviour
         timeTracker = 0f;
     }
 
+    void UpdateFromRecordedMovement(FrameMovement frameMovement)
+    {
+        _head.rotation = Quaternion.Euler(frameMovement.lookAngleY, frameMovement.lookAngleX, 0);
+        if (frameMovement.jump) _movement.Jump();
+        if (frameMovement.sprint) _movement.Sprint();
+    }
+    /*
     // Update is called once per frame
     void Update()
     {
@@ -33,5 +40,5 @@ public class ArtificialController : MonoBehaviour
 
         Vector3 newMove = new Vector3(xInput.Evaluate(timeTracker), 0f, yInput.Evaluate(timeTracker));
         _movement.forceNextFrame += newMove * Time.deltaTime;
-    }
+    }*/
 }
