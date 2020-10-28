@@ -9,11 +9,7 @@ public class ArtificialController : MonoBehaviour
     Transform _head;
     Collider _body;
     FootCollider _feet;
-
-    public AnimationCurve xInput;
-    public AnimationCurve yInput;
-
-    float timeTracker;
+    Animator _animator;
 
     void Awake()
     {
@@ -22,15 +18,30 @@ public class ArtificialController : MonoBehaviour
         _body = GetComponent<Collider>();
         _head = transform.Find("Head");
         _feet = GetComponentInChildren<FootCollider>();
+        _animator = GetComponent<Animator>();
 
-        timeTracker = 0f;
+        Physics.IgnoreCollision(_body, _feet.GetComponent<Collider>(), true);
     }
 
-    void UpdateFromRecordedMovement(FrameMovement frameMovement)
+    public void UpdateFromRecordedMovement(FrameMovement frameMovement)
     {
-        _head.rotation = Quaternion.Euler(frameMovement.lookAngleY, frameMovement.lookAngleX, 0);
+        _head.rotation = frameMovement.look;
+        if (frameMovement.vMov != 0 || frameMovement.hMov != 0)
+        {
+            float faceAngle = Mathf.Atan2(frameMovement.hMov, frameMovement.vMov) * Mathf.Rad2Deg + _head.rotation.eulerAngles.y;
+            Vector3 newMove = Quaternion.Euler(0f, faceAngle, 0f) * Vector3.forward;
+            _movement.forceNextFrame += newMove * Time.deltaTime;
+        }
         if (frameMovement.jump) _movement.Jump();
         if (frameMovement.sprint) _movement.Sprint();
+        if (frameMovement.grab) _grabber.ToggleGrab();
+
+        if (_animator != null)
+        {
+            _animator.transform.rotation = Quaternion.Euler(0, _head.rotation.eulerAngles.y, 0);
+            _animator.SetFloat("hMov", Mathf.Lerp(_animator.GetFloat("hMov"), frameMovement.hMov, 0.05f));
+            _animator.SetFloat("vMov", Mathf.Lerp(_animator.GetFloat("vMov"), frameMovement.vMov, 0.05f));
+        }
     }
     /*
     // Update is called once per frame

@@ -92,6 +92,12 @@ public class GrabController : MonoBehaviour
         }
     }
 
+    public void ToggleGrab()
+    {
+        if (!isGrabbing) Grab();
+        else Release();
+    }
+
     public void Grab()
     {
         if (currentLookRB == null) return;

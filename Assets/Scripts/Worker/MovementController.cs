@@ -6,6 +6,7 @@ public class MovementController : MonoBehaviour
 {
     Rigidbody _rb;
     FootCollider _feet;
+    Animator _animator;
 
     [SerializeField]
     [Range(0f, 2f)]
@@ -67,7 +68,7 @@ public class MovementController : MonoBehaviour
                 float speedMult = airSpeedMult.Evaluate(currentLateralVelocity.magnitude * dotProduct);
                 speed *= speedMult;
 
-                _rb.AddForce(forceNextFrame * speed * 1000);
+                _rb.AddForce(forceNextFrame * speed * 20 / Time.fixedDeltaTime);
                 forceNextFrame = Vector3.zero;
             }
         }
@@ -87,7 +88,7 @@ public class MovementController : MonoBehaviour
 
     public void Jump()
     {
-        if (jumping) return;
+        if (jumping || !_feet.isGrounded) return;
         _rb.velocity = new Vector3
             (0, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), 0) +
             (_rb.position - lastGroundPosition) / Time.fixedDeltaTime;
