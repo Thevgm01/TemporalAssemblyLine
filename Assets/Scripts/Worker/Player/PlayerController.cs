@@ -41,9 +41,10 @@ public class PlayerController : MonoBehaviour
         _head = transform.Find("Head");
         _feet = GetComponentInChildren<FootCollider>();
         _animator = GetComponent<Animator>();
+    }
 
-        Physics.IgnoreCollision(_body, _feet.GetComponent<Collider>(), true);
-
+    void Start()
+    {
         handIcon.Hide();
         _grabber.cannotGrab += handIcon.Hide;
         _grabber.canGrab += handIcon.Open;
@@ -52,6 +53,7 @@ public class PlayerController : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
 
+        Physics.IgnoreCollision(_body, _feet.GetComponent<Collider>(), true);
     }
 
     void Update()

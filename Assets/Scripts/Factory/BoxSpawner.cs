@@ -18,11 +18,18 @@ public class BoxSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (frequency <= 0) return;
+
         timer += Time.deltaTime;
         if (timer >= 1f / frequency)
         {
-            Instantiate(box, this.transform.position, this.transform.rotation);
+            Spawn();
             timer = 0f;
         }
+    }
+
+    public void Spawn()
+    {
+        Instantiate(box, this.transform.position, this.transform.rotation);
     }
 }

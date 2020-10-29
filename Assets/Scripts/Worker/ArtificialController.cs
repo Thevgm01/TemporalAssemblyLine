@@ -19,7 +19,10 @@ public class ArtificialController : MonoBehaviour
         _head = transform.Find("Head");
         _feet = GetComponentInChildren<FootCollider>();
         _animator = GetComponent<Animator>();
+    }
 
+    void Start()
+    {
         Physics.IgnoreCollision(_body, _feet.GetComponent<Collider>(), true);
     }
 
