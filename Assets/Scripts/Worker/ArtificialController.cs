@@ -42,7 +42,6 @@ public class ArtificialController : MonoBehaviour
 
         _movement.sprintTime = frameMovement.sprint;
         _movement.ApplyForces(frameMovement.forceNextFrame);
-        Debug.Log(transform.position);
     }
     /*
     // Update is called once per frame

@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class MovementRecorder : MonoBehaviour
 {
+    private enum State
+    {
+        Idle,
+        Recording,
+        Looping
+    }
+    private State state = State.Idle;
+
     PlayerController masterController;
     Vector3 startPosition;
     List<ArtificialController> slaveControllers;
@@ -11,6 +19,8 @@ public class MovementRecorder : MonoBehaviour
     int numFrames => frameMovements.Count;
     [SerializeField]
     BoxSpawner boxSpawner;
+    [SerializeField]
+    BoxReceptacle boxReceptacle;
 
     [SerializeField]
     [Range(0f, 10f)]
@@ -26,6 +36,7 @@ public class MovementRecorder : MonoBehaviour
     void Start()
     {
         if (boxSpawner != null) boxSpawner.frequency = 0f;
+        if (boxReceptacle != null) boxReceptacle.boxReceived += BoxReceived;
 
         framesPerLoop = 60 * secondsPerLoop;
     }
@@ -33,8 +44,11 @@ public class MovementRecorder : MonoBehaviour
     void NewMovement(FrameMovement frameMovement)
     {
         frameMovements.Add(frameMovement);
+    }
 
-        if (masterController == null) return;
+    void FixedUpdate()
+    {
+        if (state == State.Idle) return;
 
         if ((slaveControllers.Count < maxCopies || maxCopies < 0) &&
             numFrames % framesPerLoop == 0 && numFrames > 0)
@@ -46,8 +60,18 @@ public class MovementRecorder : MonoBehaviour
         for (int i = 0; i < slaveControllers.Count; i++)
         {
             int index = numFrames - (i + 1) * framesPerLoop;
-            if (index >= 0 && index < frameMovements.Count)
-                slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
+            if (index >= 0)
+            {
+                if (index >= frameMovements.Count)
+                {
+                    Destroy(slaveControllers[i].gameObject);
+                    slaveControllers.RemoveAt(i);
+                }
+                else
+                {
+                    slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
+                }
+            }
         }
     }
 
@@ -63,9 +87,18 @@ public class MovementRecorder : MonoBehaviour
         newSlave.transform.position = startPosition;
     }
 
+    void BoxReceived(int num)
+    {
+        if(num > 1 && state == State.Recording)
+        {
+            masterController.movementEvent -= NewMovement;
+            state = State.Looping;
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if(masterController == null && other.tag == "Player")
+        if(state == State.Idle && other.tag == "Player")
         {
             masterController = other.GetComponent<PlayerController>();
             masterController.movementEvent += NewMovement;
@@ -74,6 +107,8 @@ public class MovementRecorder : MonoBehaviour
 
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
+
+            state = State.Recording;
         }
     }
 }
