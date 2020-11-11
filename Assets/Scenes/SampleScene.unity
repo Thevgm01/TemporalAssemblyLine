@@ -417,7 +417,7 @@ Transform:
   - {fileID: 917905164}
   - {fileID: 95427239}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1001 &488388856
 PrefabInstance:
@@ -484,7 +484,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: bd3aab22ccc8eb24b86dd62160c15549,
         type: 3}
       propertyPath: m_Name
-      value: Ch11_nonPBR
+      value: Worker
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bd3aab22ccc8eb24b86dd62160c15549,
         type: 3}
@@ -5373,7 +5373,7 @@ Transform:
   - {fileID: 848750451}
   - {fileID: 568527123}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &813718489
 GameObject:
@@ -5439,7 +5439,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &848750451 stripped
 Transform:
@@ -5865,7 +5865,7 @@ RectTransform:
   m_Children:
   - {fileID: 96400239}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -5995,7 +5995,7 @@ GameObject:
   - component: {fileID: 1537817283}
   - component: {fileID: 1537817282}
   m_Layer: 0
-  m_Name: GameObject (2)
+  m_Name: Time Gate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6017,7 +6017,7 @@ Transform:
   - {fileID: 1940418486}
   - {fileID: 531338754}
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1537817282
 MonoBehaviour:
@@ -6032,7 +6032,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boxSpawner: {fileID: 1529799722}
-  secondsPerLoop: 3
+  secondsPerLoop: 5
+  maxCopies: -1
 --- !u!65 &1537817283
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6077,6 +6078,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boxSpawner: {fileID: 0}
   secondsPerLoop: 3
+  maxCopies: -1
 --- !u!4 &1598952438
 Transform:
   m_ObjectHideFlags: 0

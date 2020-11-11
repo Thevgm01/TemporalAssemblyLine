@@ -47,7 +47,9 @@ public class GrabController : MonoBehaviour
         if (currentGrabRB == null)
         {
             Physics.Raycast(_head.position, _head.forward, out var ray, maxGrabDistance, grabLayer);
-            //if(ray.collider != null) Debug.DrawLine(_head.position, ray.point);
+
+            if (ray.collider != null) Debug.DrawLine(_head.position, ray.point, Color.green);
+            else Debug.DrawLine(_head.position, _head.position + _head.forward * maxGrabDistance, Color.white);
 
             if (ray.collider != null) // Looking at an object in the grabbable layer
             {

@@ -6,16 +6,19 @@ using System;
 public struct FrameMovement
 {
     public Quaternion look;
+    public Vector3 forceNextFrame;
     public float hMov;
     public float vMov;
     public bool sprint;
     public bool jump;
     public bool grab;
+    public bool release;
 }
 
 public class PlayerController : MonoBehaviour
 {
-    public Action<FrameMovement> movementEvent;
+    public Action<FrameMovement> movementEvent = delegate { };
+    FrameMovement frameMovement;
 
     public Transform _camera;
     GrabController _grabber;
@@ -41,6 +44,8 @@ public class PlayerController : MonoBehaviour
         _head = transform.Find("Head");
         _feet = GetComponentInChildren<FootCollider>();
         _animator = GetComponent<Animator>();
+
+        frameMovement = new FrameMovement();
     }
 
     void Start()
@@ -49,7 +54,9 @@ public class PlayerController : MonoBehaviour
         _grabber.cannotGrab += handIcon.Hide;
         _grabber.canGrab += handIcon.Open;
         _grabber.grabbed += handIcon.Close;
+        _grabber.grabbed += x => { frameMovement.grab = true; };
         _grabber.letGo += handIcon.Open;
+        _grabber.letGo += x => { frameMovement.release = true; };
 
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -58,8 +65,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        FrameMovement frameMovement = new FrameMovement();
-
         // Looking
         lookAngleX = Mathf.Repeat(lookAngleX + Input.GetAxis("Mouse X") * lookSensetivity, 360f);
         lookAngleY = Mathf.Clamp(lookAngleY - Input.GetAxis("Mouse Y") * lookSensetivity, -90f, 90f);
@@ -73,8 +78,9 @@ public class PlayerController : MonoBehaviour
             Vector3 newMove = Quaternion.Euler(0f, faceAngle, 0f) * Vector3.forward;
             _movement.forceNextFrame += newMove * Time.deltaTime;
 
-            frameMovement.hMov = hMov;
-            frameMovement.vMov = vMov;
+            frameMovement.hMov += hMov;
+            frameMovement.vMov += vMov;
+            frameMovement.forceNextFrame += newMove * Time.deltaTime;
         }
 
         if (_animator != null)
@@ -99,9 +105,15 @@ public class PlayerController : MonoBehaviour
         if(Input.GetMouseButtonDown(0))
         {
             _grabber.ToggleGrab();
-            frameMovement.grab = true;
         }
 
         movementEvent?.Invoke(frameMovement);
+    }
+
+    void FixedUpdate()
+    {
+        movementEvent?.Invoke(frameMovement);
+        frameMovement = new FrameMovement();
+        frameMovement.forceNextFrame = _movement.forceNextFrame;
     }
 }

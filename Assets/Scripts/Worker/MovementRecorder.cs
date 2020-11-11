@@ -15,9 +15,12 @@ public class MovementRecorder : MonoBehaviour
     [Range(0f, 10f)]
     int secondsPerLoop = 3;
     int framesPerLoop;
+    int frameTracker;
 
-    int startFrame;
-
+    [SerializeField]
+    [Range(-1, 100)]
+    [Tooltip("Negative 1 means unlimited copies")]
+    int maxCopies = -1;
 
     // Start is called before the first frame update
     void Start()
@@ -30,23 +33,21 @@ public class MovementRecorder : MonoBehaviour
     void NewMovement(FrameMovement frameMovement)
     {
         frameMovements.Add(frameMovement);
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if(masterController == null) return;
+        frameTracker++;
 
-        int frameOffset = Time.frameCount - startFrame;
-        if (frameOffset % framesPerLoop == 0 && frameOffset > 0)
+        if (masterController == null) return;
+
+        if ((slaveControllers.Count < maxCopies || maxCopies < 0) && 
+            frameTracker % framesPerLoop == 0 && frameTracker > 0)
         {
             ClonePlayer();
             boxSpawner.Spawn();
         }
 
-        for(int i = 0; i < slaveControllers.Count; i++)
+        for (int i = 0; i < slaveControllers.Count; i++)
         {
-            int index = frameOffset - (i + 1) * framesPerLoop;
+            int index = frameTracker - (i + 1) * framesPerLoop;
             if (index >= 0 && index < frameMovements.Count)
                 slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
         }
@@ -76,7 +77,7 @@ public class MovementRecorder : MonoBehaviour
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
 
-            startFrame = Time.frameCount;
+            frameTracker = 0;
         }
     }
 }
