@@ -27,26 +27,22 @@ public class MovementController : MonoBehaviour
     [Range(0f, 5f)]
     public float jumpHeight = 4f;
 
-    private float sprintTime = 0f;
+    [HideInInspector]
+    public float sprintTime = 0f;
 
     private bool jumping = false;
-
-    [HideInInspector]
-    public Vector3 forceNextFrame;
 
     private Vector3 lastGroundPosition;
 
     void Awake()
     {
-        forceNextFrame = Vector3.zero;
-
         _rb = GetComponent<Rigidbody>();
         _feet = GetComponentInChildren<FootCollider>();
 
         _feet.landed += Land;
     }
 
-    void FixedUpdate()
+    public Vector3 ApplyForces(Vector3 forceNextFrame)
     {
         lastGroundPosition = _rb.position;
 
@@ -78,6 +74,8 @@ public class MovementController : MonoBehaviour
             sprintTime -= Time.fixedDeltaTime / sprintSpeedChange;
             if (sprintTime < 0f) sprintTime = 0f;
         }
+
+        return forceNextFrame;
     }
 
     public void Sprint()
