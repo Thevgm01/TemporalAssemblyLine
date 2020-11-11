@@ -7,9 +7,10 @@ public struct FrameMovement
 {
     public Quaternion look;
     public Vector3 forceNextFrame;
+    public Vector3 position; 
     public float hMov;
     public float vMov;
-    public bool sprint;
+    public float sprint;
     public bool jump;
     public bool grab;
     public bool release;
@@ -76,7 +77,7 @@ public class PlayerController : MonoBehaviour
         {
             float faceAngle = Mathf.Atan2(hMov, vMov) * Mathf.Rad2Deg + lookAngleX;
             Vector3 newMove = Quaternion.Euler(0f, faceAngle, 0f) * Vector3.forward;
-            _movement.forceNextFrame += newMove * Time.deltaTime;
+            //_movement.forceNextFrame += newMove * Time.deltaTime;
 
             frameMovement.hMov += hMov;
             frameMovement.vMov += vMov;
@@ -93,7 +94,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift))
         {
             _movement.Sprint();
-            frameMovement.sprint = true;
         }
 
         if (Input.GetKey(KeyCode.Space))
@@ -106,14 +106,15 @@ public class PlayerController : MonoBehaviour
         {
             _grabber.ToggleGrab();
         }
-
-        movementEvent?.Invoke(frameMovement);
     }
 
     void FixedUpdate()
     {
+        frameMovement.sprint = _movement.sprintTime;
+        Vector3 tempForce = _movement.ApplyForces(frameMovement.forceNextFrame);
         movementEvent?.Invoke(frameMovement);
+        frameMovement.position = transform.position;
         frameMovement = new FrameMovement();
-        frameMovement.forceNextFrame = _movement.forceNextFrame;
+        frameMovement.forceNextFrame = tempForce;
     }
 }

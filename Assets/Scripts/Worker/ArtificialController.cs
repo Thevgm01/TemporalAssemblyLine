@@ -29,9 +29,7 @@ public class ArtificialController : MonoBehaviour
     public void UpdateFromRecordedMovement(FrameMovement frameMovement)
     {
         _head.rotation = frameMovement.look;
-        _movement.forceNextFrame = frameMovement.forceNextFrame;
         if (frameMovement.jump) _movement.Jump();
-        if (frameMovement.sprint) _movement.Sprint();
         if (frameMovement.grab) _grabber.Grab();
         else if (frameMovement.release) _grabber.Release();
 
@@ -41,6 +39,10 @@ public class ArtificialController : MonoBehaviour
             _animator.SetFloat("hMov", Mathf.Lerp(_animator.GetFloat("hMov"), frameMovement.hMov, 0.05f));
             _animator.SetFloat("vMov", Mathf.Lerp(_animator.GetFloat("vMov"), frameMovement.vMov, 0.05f));
         }
+
+        _movement.sprintTime = frameMovement.sprint;
+        _movement.ApplyForces(frameMovement.forceNextFrame);
+        Debug.Log(transform.position);
     }
     /*
     // Update is called once per frame

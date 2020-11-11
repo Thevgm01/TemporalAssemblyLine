@@ -8,6 +8,7 @@ public class MovementRecorder : MonoBehaviour
     Vector3 startPosition;
     List<ArtificialController> slaveControllers;
     List<FrameMovement> frameMovements;
+    int numFrames => frameMovements.Count;
     [SerializeField]
     BoxSpawner boxSpawner;
 
@@ -15,7 +16,6 @@ public class MovementRecorder : MonoBehaviour
     [Range(0f, 10f)]
     int secondsPerLoop = 3;
     int framesPerLoop;
-    int frameTracker;
 
     [SerializeField]
     [Range(-1, 100)]
@@ -34,12 +34,10 @@ public class MovementRecorder : MonoBehaviour
     {
         frameMovements.Add(frameMovement);
 
-        frameTracker++;
-
         if (masterController == null) return;
 
-        if ((slaveControllers.Count < maxCopies || maxCopies < 0) && 
-            frameTracker % framesPerLoop == 0 && frameTracker > 0)
+        if ((slaveControllers.Count < maxCopies || maxCopies < 0) &&
+            numFrames % framesPerLoop == 0 && numFrames > 0)
         {
             ClonePlayer();
             boxSpawner.Spawn();
@@ -47,7 +45,7 @@ public class MovementRecorder : MonoBehaviour
 
         for (int i = 0; i < slaveControllers.Count; i++)
         {
-            int index = frameTracker - (i + 1) * framesPerLoop;
+            int index = numFrames - (i + 1) * framesPerLoop;
             if (index >= 0 && index < frameMovements.Count)
                 slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
         }
@@ -76,8 +74,6 @@ public class MovementRecorder : MonoBehaviour
 
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
-
-            frameTracker = 0;
         }
     }
 }
