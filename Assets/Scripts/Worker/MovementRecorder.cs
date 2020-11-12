@@ -32,6 +32,8 @@ public class MovementRecorder : MonoBehaviour
     [Tooltip("Negative 1 means unlimited copies")]
     int maxCopies = -1;
 
+    public GameObject deathParticles;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -92,7 +94,9 @@ public class MovementRecorder : MonoBehaviour
         }
         else if(state == State.Looping)
         {
-            Destroy(slaveControllers[slaveControllers.Count - 1].gameObject);
+            ArtificialController lastController = slaveControllers[slaveControllers.Count - 1];
+            Instantiate(deathParticles, lastController.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+            Destroy(lastController.gameObject);
             slaveControllers.RemoveAt(slaveControllers.Count - 1);
         }
     }
