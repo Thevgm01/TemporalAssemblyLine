@@ -113,8 +113,8 @@ public class PlayerController : MonoBehaviour
         frameMovement.sprint = _movement.sprintTime;
         Vector3 tempForce = _movement.ApplyForces(frameMovement.forceNextFrame);
         movementEvent?.Invoke(frameMovement);
-        frameMovement.position = transform.position;
         frameMovement = new FrameMovement();
+        frameMovement.position = transform.position;
         frameMovement.forceNextFrame = tempForce;
     }
 }

@@ -16,16 +16,16 @@ public class MovementRecorder : MonoBehaviour
     Vector3 startPosition;
     List<ArtificialController> slaveControllers;
     List<FrameMovement> frameMovements;
-    int numFrames => frameMovements.Count;
+    int numFrames;
     [SerializeField]
-    BoxSpawner boxSpawner;
+    BoxSpawner boxSpawner = null;
     [SerializeField]
-    BoxReceptacle boxReceptacle;
+    BoxReceptacle boxReceptacle = null;
 
     [SerializeField]
     [Range(0f, 10f)]
-    int secondsPerLoop = 3;
-    int framesPerLoop;
+    int secondsPerCopy = 3;
+    int framesPerCopy;
 
     [SerializeField]
     [Range(-1, 100)]
@@ -38,7 +38,7 @@ public class MovementRecorder : MonoBehaviour
         if (boxSpawner != null) boxSpawner.frequency = 0f;
         if (boxReceptacle != null) boxReceptacle.boxReceived += BoxReceived;
 
-        framesPerLoop = 60 * secondsPerLoop;
+        framesPerCopy = (int)(secondsPerCopy / Time.fixedDeltaTime);
     }
 
     void NewMovement(FrameMovement frameMovement)
@@ -51,36 +51,32 @@ public class MovementRecorder : MonoBehaviour
         if (state == State.Idle) return;
 
         if ((slaveControllers.Count < maxCopies || maxCopies < 0) &&
-            numFrames % framesPerLoop == 0 && numFrames > 0)
+            numFrames % framesPerCopy == 0 && numFrames > 0)
         {
             ClonePlayer();
             boxSpawner.Spawn();
         }
 
-        for (int i = 0; i < slaveControllers.Count; i++)
+        for (int i = 0; i < slaveControllers.Count; ++i)
         {
-            int index = numFrames - (i + 1) * framesPerLoop;
-            if (index >= 0)
-            {
-                if (index >= frameMovements.Count)
-                {
-                    Destroy(slaveControllers[i].gameObject);
-                    slaveControllers.RemoveAt(i);
-                }
-                else
-                {
-                    slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
-                }
-            }
+            int index = (numFrames % framesPerCopy) + i * framesPerCopy;
+            //if (index >= frameMovements.Count) { }
+            //else
+            //{
+                slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
+            //}
         }
+
+        ++numFrames;
     }
 
     void ClonePlayer()
     {
         GameObject newSlave = Instantiate(masterController.gameObject);
+        newSlave.name = "PlayerClone" + numFrames;
 
         Destroy(newSlave.GetComponent<PlayerController>()); // Destroy old player controller
-        slaveControllers.Add(newSlave.AddComponent<ArtificialController>()); // Add artificial controller
+        slaveControllers.Insert(0, newSlave.AddComponent<ArtificialController>()); // Add artificial controller
         newSlave.GetComponent<Animator>().enabled = true; // Enable animator
         newSlave.transform.Find("Worker").gameObject.SetActive(true); // Enable avatar
 
@@ -89,10 +85,15 @@ public class MovementRecorder : MonoBehaviour
 
     void BoxReceived(int num)
     {
-        if(num > 1 && state == State.Recording)
+        if(num > 0 && state == State.Recording)
         {
             masterController.movementEvent -= NewMovement;
             state = State.Looping;
+        }
+        else if(state == State.Looping)
+        {
+            Destroy(slaveControllers[slaveControllers.Count - 1].gameObject);
+            slaveControllers.RemoveAt(slaveControllers.Count - 1);
         }
     }
 
@@ -107,7 +108,9 @@ public class MovementRecorder : MonoBehaviour
 
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
+            boxSpawner.Spawn();
 
+            numFrames = 0;
             state = State.Recording;
         }
     }
