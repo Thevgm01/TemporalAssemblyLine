@@ -32,6 +32,7 @@ public class MovementRecorder : MonoBehaviour
     [Tooltip("Negative 1 means unlimited copies")]
     int maxCopies = -1;
 
+    public GameObject cloneParticles;
     public GameObject deathParticles;
 
     // Start is called before the first frame update
@@ -62,11 +63,10 @@ public class MovementRecorder : MonoBehaviour
         for (int i = 0; i < slaveControllers.Count; ++i)
         {
             int index = (numFrames % framesPerCopy) + i * framesPerCopy;
-            //if (index >= frameMovements.Count) { }
-            //else
-            //{
+            if (index >= frameMovements.Count)
+                DestroyLastClone();
+            else
                 slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
-            //}
         }
 
         ++numFrames;
@@ -83,6 +83,15 @@ public class MovementRecorder : MonoBehaviour
         newSlave.transform.Find("Worker").gameObject.SetActive(true); // Enable avatar
 
         newSlave.transform.position = startPosition;
+        Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
+    }
+
+    void DestroyLastClone()
+    {
+        ArtificialController lastController = slaveControllers[slaveControllers.Count - 1];
+        Instantiate(deathParticles, lastController.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+        Destroy(lastController.gameObject);
+        slaveControllers.RemoveAt(slaveControllers.Count - 1);
     }
 
     void BoxReceived(int num)
@@ -94,10 +103,7 @@ public class MovementRecorder : MonoBehaviour
         }
         else if(state == State.Looping)
         {
-            ArtificialController lastController = slaveControllers[slaveControllers.Count - 1];
-            Instantiate(deathParticles, lastController.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
-            Destroy(lastController.gameObject);
-            slaveControllers.RemoveAt(slaveControllers.Count - 1);
+            //DestroyLastClone();
         }
     }
 
