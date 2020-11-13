@@ -80,7 +80,8 @@ public class GrabController : MonoBehaviour
     {
         if (currentGrabRB != null)
         {
-
+            currentGrabRB.MovePosition(Vector3.Lerp(currentGrabRB.position, _head.position + (_head.forward * holdDistance), 0.1f / currentGrabRB.mass));
+            /*
             Vector3 posDif = _head.position + (_head.forward * holdDistance) - currentGrabRB.position;
             currentGrabRB.AddForce(posDif * posDif.sqrMagnitude * grabForce);
 
@@ -91,6 +92,7 @@ public class GrabController : MonoBehaviour
 
             currentGrabRB.velocity *= 0.9f;
             currentGrabRB.angularVelocity *= 0.9f;
+            */
         }
     }
 
@@ -105,7 +107,7 @@ public class GrabController : MonoBehaviour
         if (currentLookRB == null) return;
 
         currentGrabRB = currentLookRB;
-        currentGrabRB.useGravity = false;
+        currentGrabRB.isKinematic = true;
         //currentGrabRB.interpolation = RigidbodyInterpolation.Extrapolate;
         Physics.IgnoreCollision(_body, currentGrabRB.GetComponent<Collider>(), true);
         grabbed?.Invoke(currentGrabRB.transform);
@@ -118,7 +120,7 @@ public class GrabController : MonoBehaviour
         letGo?.Invoke(currentGrabRB.transform);
         StartCoroutine("EnableCollisionsOnExit", currentGrabRB.GetComponent<Collider>());
         //currentGrabRB.interpolation = RigidbodyInterpolation.None;
-        currentGrabRB.useGravity = true;
+        currentGrabRB.isKinematic = false;
         currentGrabRB = null;
     }
 
