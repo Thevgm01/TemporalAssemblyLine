@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class MovementRecorder : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class MovementRecorder : MonoBehaviour
         Looping
     }
     private State state = State.Idle;
+
+    Action cycleElapsed = delegate { };
 
     PlayerController masterController;
     Vector3 startPosition;
@@ -24,7 +27,7 @@ public class MovementRecorder : MonoBehaviour
 
     [SerializeField]
     [Range(0f, 10f)]
-    int secondsPerCopy = 3;
+    float secondsPerCopy = 3;
     int framesPerCopy;
 
     [SerializeField]
@@ -38,8 +41,15 @@ public class MovementRecorder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (boxSpawner != null) boxSpawner.frequency = 0f;
-        if (boxReceptacle != null) boxReceptacle.boxReceived += BoxReceived;
+        if (boxSpawner != null)
+        {
+            boxSpawner.frequency = 0f;
+            cycleElapsed += boxSpawner.Spawn;
+        }
+        if (boxReceptacle != null)
+        {
+            boxReceptacle.boxReceived += BoxReceived;
+        }
 
         framesPerCopy = (int)(secondsPerCopy / Time.fixedDeltaTime);
     }
@@ -57,7 +67,7 @@ public class MovementRecorder : MonoBehaviour
             numFrames % framesPerCopy == 0 && numFrames > 0)
         {
             ClonePlayer();
-            boxSpawner.Spawn();
+            cycleElapsed?.Invoke();
         }
 
         for (int i = 0; i < slaveControllers.Count; ++i)
@@ -118,7 +128,7 @@ public class MovementRecorder : MonoBehaviour
 
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
-            boxSpawner.Spawn();
+            cycleElapsed?.Invoke();
 
             numFrames = 0;
             state = State.Recording;

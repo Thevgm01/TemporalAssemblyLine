@@ -60,6 +60,7 @@ public class PlayerController : MonoBehaviour
         _grabber.letGo += x => { frameMovement.release = true; };
 
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         Physics.IgnoreCollision(_body, _feet.GetComponent<Collider>(), true);
     }
