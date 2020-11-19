@@ -126,16 +126,23 @@ public class GrabController : MonoBehaviour
         grabbed?.Invoke(currentGrabRB.transform);
         _grabbing = true;
 
-        currentGrabRB.freezeRotation = true;
-        currentGrabRB.useGravity = false;
+        if (currentGrabRB.tag == "Box")
+        {
+            currentGrabRB.freezeRotation = true;
+            currentGrabRB.useGravity = false;
+        }
         //currentGrabRB.isKinematic = true;
         //currentGrabRB.interpolation = RigidbodyInterpolation.Extrapolate;
     }
 
     public void Release()
     {
-        currentGrabRB.freezeRotation = false;
-        currentGrabRB.useGravity = true;
+        if (currentGrabRB == null) return;
+        if (currentGrabRB.tag == "Box")
+        {
+            currentGrabRB.freezeRotation = false;
+            currentGrabRB.useGravity = true;
+        }
         //currentGrabRB.isKinematic = false;
         //currentGrabRB.interpolation = RigidbodyInterpolation.None;
 

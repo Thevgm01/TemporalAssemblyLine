@@ -13,7 +13,7 @@ public class MovementRecorder : MonoBehaviour
     }
     private State state = State.Idle;
 
-    Action cycleElapsed = delegate { };
+    Action CycleElapsed = delegate { };
 
     PlayerController masterController;
     Vector3 startPosition;
@@ -36,15 +36,16 @@ public class MovementRecorder : MonoBehaviour
     int maxCopies = -1;
 
     public GameObject cloneParticles;
+    int framesToSpawnCloneParticles;
     public GameObject deathParticles;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if (boxSpawner != null)
         {
             boxSpawner.frequency = 0f;
-            cycleElapsed += boxSpawner.Spawn;
+            CycleElapsed += boxSpawner.Spawn;
         }
         if (boxReceptacle != null)
         {
@@ -52,6 +53,12 @@ public class MovementRecorder : MonoBehaviour
         }
 
         framesPerCopy = (int)(secondsPerCopy / Time.fixedDeltaTime);
+
+        Lever lever = GetComponentInChildren<Lever>();
+        if (lever != null) lever.Pulled += Reset;
+
+        var main = cloneParticles.GetComponent<ParticleSystem>().main;
+        framesToSpawnCloneParticles = (int)(60 * main.startLifetime.Evaluate(0));
     }
 
     void NewMovement(FrameMovement frameMovement)
@@ -63,11 +70,17 @@ public class MovementRecorder : MonoBehaviour
     {
         if (state == State.Idle) return;
 
-        if ((slaveControllers.Count < maxCopies || maxCopies < 0) &&
-            numFrames % framesPerCopy == 0 && numFrames > 0)
+        if ((slaveControllers.Count < maxCopies || maxCopies < 0))
         {
-            ClonePlayer();
-            cycleElapsed?.Invoke();
+            if (numFrames % framesPerCopy == framesPerCopy - framesToSpawnCloneParticles + 10)
+            {
+                Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
+            }
+            else if (numFrames % framesPerCopy == 0 && numFrames > 0)
+            {
+                ClonePlayer();
+                CycleElapsed?.Invoke();
+            }
         }
 
         for (int i = 0; i < slaveControllers.Count; ++i)
@@ -93,13 +106,14 @@ public class MovementRecorder : MonoBehaviour
         newSlave.transform.Find("Worker").gameObject.SetActive(true); // Enable avatar
 
         newSlave.transform.position = startPosition;
-        Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
+        //Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
     }
 
     void DestroyLastClone()
     {
         ArtificialController lastController = slaveControllers[slaveControllers.Count - 1];
         Instantiate(deathParticles, lastController.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+        lastController.UpdateFromRecordedMovement(new FrameMovement { release = true });
         Destroy(lastController.gameObject);
         slaveControllers.RemoveAt(slaveControllers.Count - 1);
     }
@@ -117,6 +131,12 @@ public class MovementRecorder : MonoBehaviour
         }
     }
 
+    void Reset()
+    {
+        while (slaveControllers.Count > 0) DestroyLastClone();
+        state = State.Idle;
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if(state == State.Idle && other.tag == "Player")
@@ -128,7 +148,7 @@ public class MovementRecorder : MonoBehaviour
 
             slaveControllers = new List<ArtificialController>();
             frameMovements = new List<FrameMovement>();
-            cycleElapsed?.Invoke();
+            CycleElapsed?.Invoke();
 
             numFrames = 0;
             state = State.Recording;

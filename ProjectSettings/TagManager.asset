@@ -4,9 +4,8 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - PlayerHead
-  - PlayerArm
-  - Grabbable
+  - Box
+  - Lever
   layers:
   - Default
   - TransparentFX
