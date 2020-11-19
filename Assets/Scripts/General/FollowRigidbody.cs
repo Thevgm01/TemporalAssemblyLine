@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FollowTransform : MonoBehaviour
+public class FollowRigidbody : MonoBehaviour
 {
-    public Transform target;
+    public Rigidbody target;
 
     public bool position;
     public bool rotation;

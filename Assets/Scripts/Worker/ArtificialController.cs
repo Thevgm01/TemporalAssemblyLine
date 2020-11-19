@@ -11,6 +11,9 @@ public class ArtificialController : MonoBehaviour
     FootCollider _feet;
     Animator _animator;
 
+    bool synced = true;
+    public int grabFrameBuffer { private get; set; }
+
     void Awake()
     {
         _grabber = GetComponent<GrabController>();
@@ -29,9 +32,15 @@ public class ArtificialController : MonoBehaviour
     public void UpdateFromRecordedMovement(FrameMovement frameMovement)
     {
         _head.rotation = frameMovement.look;
-        if (frameMovement.jump) _movement.Jump();
-        if (frameMovement.grab) _grabber.Grab();
-        else if (frameMovement.release) _grabber.Release();
+        if(grabFrameBuffer > 0 || frameMovement.grab)
+        {
+            if (_grabber.Grab()) grabFrameBuffer = 0;
+            else --grabFrameBuffer;
+        }
+        if (frameMovement.release)
+        {
+            if(_grabber.Release()) grabFrameBuffer = 0;
+        }
 
         if (_animator != null)
         {
@@ -39,10 +48,38 @@ public class ArtificialController : MonoBehaviour
             _animator.SetFloat("hMov", Mathf.Lerp(_animator.GetFloat("hMov"), frameMovement.hMov, 0.05f));
             _animator.SetFloat("vMov", Mathf.Lerp(_animator.GetFloat("vMov"), frameMovement.vMov, 0.05f));
         }
-
+        /*
+        if (frameMovement.jump) _movement.Jump();
         _movement.sprintTime = frameMovement.sprint;
         _movement.ApplyForces(frameMovement.forceNextFrame);
-        transform.position = frameMovement.position;
+
+        if (Vector3.Distance(transform.position, frameMovement.position) < 0.1f)
+        {
+            transform.position = frameMovement.position;
+        }
+        else
+        {
+            Debug.Log(name + " desynced!");
+        }
+        */
+
+        if(synced && frameMovement.jump && !_feet.isGrounded && _movement.jumping)
+        {
+            synced = false;
+            Debug.Log(name + " desynced!");
+        }
+
+        if(synced)
+        {
+            _movement.Move(frameMovement.position);
+        }
+        else
+        {
+            if (frameMovement.jump) _movement.Jump();
+            _movement.sprintTime = frameMovement.sprint;
+            _movement.ApplyForces(frameMovement.forceNextFrame);
+        }
+        
     }
     /*
     // Update is called once per frame

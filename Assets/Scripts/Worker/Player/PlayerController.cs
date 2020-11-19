@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     FrameMovement frameMovement;
 
     public Transform _camera;
+    Rigidbody _rb;
     GrabController _grabber;
     MovementController _movement;
     Transform _head;
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        _rb = GetComponent<Rigidbody>();
         _grabber = GetComponent<GrabController>();
         _movement = GetComponent<MovementController>();
         _body = GetComponent<Collider>();
@@ -97,7 +99,7 @@ public class PlayerController : MonoBehaviour
             _movement.Sprint();
         }
 
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && _feet.isGrounded)
         {
             _movement.Jump();
             frameMovement.jump = true;
@@ -117,5 +119,11 @@ public class PlayerController : MonoBehaviour
         frameMovement = new FrameMovement();
         frameMovement.position = transform.position;
         frameMovement.forceNextFrame = tempForce;
+    }
+
+    void LateUpdate()
+    {
+        _camera.position = Vector3.Lerp(_camera.position, _head.position, 0.5f);
+        _camera.rotation = _head.rotation;
     }
 }

@@ -116,9 +116,9 @@ public class GrabController : MonoBehaviour
         else Release();
     }
 
-    public void Grab()
+    public bool Grab()
     {
-        if (currentLookRB == null) return;
+        if (currentLookRB == null) return false;
         currentGrabRB = currentLookRB;
 
         Physics.IgnoreCollision(_body, currentGrabRB.GetComponent<Collider>(), true);
@@ -133,11 +133,13 @@ public class GrabController : MonoBehaviour
         }
         //currentGrabRB.isKinematic = true;
         //currentGrabRB.interpolation = RigidbodyInterpolation.Extrapolate;
+
+        return true;
     }
 
-    public void Release()
+    public bool Release()
     {
-        if (currentGrabRB == null) return;
+        if (currentGrabRB == null) return false;
         if (currentGrabRB.tag == "Box")
         {
             currentGrabRB.freezeRotation = false;
@@ -151,6 +153,7 @@ public class GrabController : MonoBehaviour
         _grabbing = false;
 
         currentGrabRB = null;
+        return true;
     }
 
     IEnumerator EnableCollisionsOnExit(Collider grabbedCollider)

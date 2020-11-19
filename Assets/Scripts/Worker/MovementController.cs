@@ -30,7 +30,7 @@ public class MovementController : MonoBehaviour
     [HideInInspector]
     public float sprintTime = 0f;
 
-    private bool jumping = false;
+    public bool jumping { get; private set; }
 
     private Vector3 lastGroundPosition;
 
@@ -40,6 +40,13 @@ public class MovementController : MonoBehaviour
         _feet = GetComponentInChildren<FootCollider>();
 
         _feet.landed += Land;
+        jumping = false;
+    }
+
+    public void Move(Vector3 destination)
+    {
+        _rb.MovePosition(destination);
+        _rb.velocity = Vector3.zero;
     }
 
     public Vector3 ApplyForces(Vector3 forceNextFrame)
@@ -87,9 +94,10 @@ public class MovementController : MonoBehaviour
     public void Jump()
     {
         if (jumping || !_feet.isGrounded) return;
+        Vector3 posDelta = new Vector3(_rb.position.x - lastGroundPosition.x, 0, _rb.position.z - lastGroundPosition.z);
         _rb.velocity = new Vector3
             (0, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), 0) +
-            (_rb.position - lastGroundPosition) / Time.fixedDeltaTime;
+             posDelta / Time.fixedDeltaTime;
         jumping = true;
     }
 

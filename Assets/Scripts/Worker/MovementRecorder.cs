@@ -39,6 +39,8 @@ public class MovementRecorder : MonoBehaviour
     int framesToSpawnCloneParticles;
     public GameObject deathParticles;
 
+    int grabFrameBuffer = 5;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -87,9 +89,15 @@ public class MovementRecorder : MonoBehaviour
         {
             int index = (numFrames % framesPerCopy) + i * framesPerCopy;
             if (index >= frameMovements.Count)
+            {
                 DestroyLastClone();
+            }
             else
+            {
+                if (index < frameMovements.Count - grabFrameBuffer && frameMovements[index + grabFrameBuffer].grab)
+                    slaveControllers[i].grabFrameBuffer = grabFrameBuffer * 2;
                 slaveControllers[i].UpdateFromRecordedMovement(frameMovements[index]);
+            }
         }
 
         ++numFrames;

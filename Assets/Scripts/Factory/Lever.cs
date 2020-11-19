@@ -6,6 +6,7 @@ using System;
 public class Lever : MonoBehaviour
 {
     public Action Pulled = delegate { };
+    public Action Released = delegate { };
 
     private HingeJoint hinge;
     bool pulled = false;
@@ -27,6 +28,7 @@ public class Lever : MonoBehaviour
         }
         else if(pulled && hinge.angle < hinge.limits.max - deactivateMargin)
         {
+            Released?.Invoke();
             pulled = false;
         }
     }
