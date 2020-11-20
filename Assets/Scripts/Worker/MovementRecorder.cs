@@ -35,9 +35,10 @@ public class MovementRecorder : MonoBehaviour
     [Tooltip("Negative 1 means unlimited copies")]
     int maxCopies = -1;
 
-    public GameObject cloneParticles;
+    //public GameObject cloneModel;
+    [SerializeField] GameObject cloneParticles;
     int framesToSpawnCloneParticles;
-    public GameObject deathParticles;
+    [SerializeField] GameObject deathParticles;
 
     int grabFrameBuffer = 5;
 
@@ -111,7 +112,11 @@ public class MovementRecorder : MonoBehaviour
         Destroy(newSlave.GetComponent<PlayerController>()); // Destroy old player controller
         slaveControllers.Insert(0, newSlave.AddComponent<ArtificialController>()); // Add artificial controller
         newSlave.GetComponent<Animator>().enabled = true; // Enable animator
-        newSlave.transform.Find("Worker").gameObject.SetActive(true); // Enable avatar
+
+        var avatar = newSlave.transform.Find("Worker");
+        var skin = avatar.GetComponentInChildren<SkinnedMeshRenderer>();
+        skin.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        skin.receiveShadows = true;
 
         newSlave.transform.position = startPosition;
         //Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
@@ -141,7 +146,11 @@ public class MovementRecorder : MonoBehaviour
 
     void Reset()
     {
+        if (slaveControllers == null) return;
+
         while (slaveControllers.Count > 0) DestroyLastClone();
+        boxSpawner.DestroyAll();
+        frameMovements.Clear();
         state = State.Idle;
     }
 

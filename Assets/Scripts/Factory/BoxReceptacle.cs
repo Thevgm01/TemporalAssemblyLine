@@ -12,6 +12,8 @@ public class BoxReceptacle : MonoBehaviour
 
     int numBoxesReceived = 0;
 
+    [SerializeField] GameObject boxReceivedParticles;
+
     void Awake()
     {
         boxLayerInt = (int)Mathf.Log(boxLayer.value, 2);
@@ -23,6 +25,7 @@ public class BoxReceptacle : MonoBehaviour
         {
             numBoxesReceived++;
             boxReceived?.Invoke(numBoxesReceived);
+            Instantiate(boxReceivedParticles, other.transform.position, Quaternion.identity);
             Destroy(other.gameObject);
         }
     }

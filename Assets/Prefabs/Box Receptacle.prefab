@@ -51,6 +51,8 @@ MonoBehaviour:
   boxLayer:
     serializedVersion: 2
     m_Bits: 512
+  boxReceivedParticles: {fileID: 2473260625566081582, guid: 9cdbaca9345952b458987fa829c10bad,
+    type: 3}
 --- !u!65 &330914567601275050
 BoxCollider:
   m_ObjectHideFlags: 0

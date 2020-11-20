@@ -11,22 +11,25 @@ public class Lever : MonoBehaviour
     private HingeJoint hinge;
     bool pulled = false;
 
-    int activateMargin = 5, deactivateMargin = 20;
+    float activateMargin, deactivateMargin;
 
     void Awake()
     {
         hinge = GetComponent<HingeJoint>();
+        float diff = hinge.limits.max - hinge.limits.min;
+        activateMargin = hinge.limits.min + diff * 0.67f;
+        deactivateMargin = hinge.limits.min + diff * 0.33f;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(!pulled && hinge.angle >= hinge.limits.max - activateMargin)
+        if(!pulled && hinge.angle >= activateMargin)
         {
             Pulled?.Invoke();
             pulled = true;
         }
-        else if(pulled && hinge.angle < hinge.limits.max - deactivateMargin)
+        else if(pulled && hinge.angle < deactivateMargin)
         {
             Released?.Invoke();
             pulled = false;
