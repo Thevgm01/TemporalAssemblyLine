@@ -22,10 +22,14 @@ public class MovementController : MonoBehaviour
     //public float maxSpeed;
     [SerializeField]
     [Range(0f, 1f)]
-    public float speedDecay = 0.15f;
+    float speedDecay = 0.15f;
     [SerializeField]
     [Range(0f, 5f)]
-    public float jumpHeight = 4f;
+    float jumpHeight = 4f;
+    [SerializeField]
+    [Range(0f, 1f)]
+    float floatStrength = 1f;
+    bool floating = false;
 
     [HideInInspector]
     public float sprintTime = 0f;
@@ -71,14 +75,20 @@ public class MovementController : MonoBehaviour
                 float speedMult = airSpeedMult.Evaluate(currentLateralVelocity.magnitude * dotProduct);
                 speed *= speedMult;
 
-                _rb.AddForce(forceNextFrame * speed * 20 / Time.fixedDeltaTime);
+                _rb.AddForce(forceNextFrame * speed * 20 / 0.02f);
                 forceNextFrame = Vector3.zero;
             }
         }
 
+        if (!_feet.isGrounded && floating)
+        {
+            _rb.AddForce(new Vector3(0, floatStrength / 0.02f, 0), ForceMode.Acceleration);
+            floating = false;
+        }
+
         if (sprintTime > 0f)
         {
-            sprintTime -= Time.fixedDeltaTime / sprintSpeedChange;
+            sprintTime -= 0.02f / sprintSpeedChange;
             if (sprintTime < 0f) sprintTime = 0f;
         }
 
@@ -93,12 +103,18 @@ public class MovementController : MonoBehaviour
 
     public void Jump()
     {
-        if (jumping || !_feet.isGrounded) return;
-        Vector3 posDelta = new Vector3(_rb.position.x - lastGroundPosition.x, 0, _rb.position.z - lastGroundPosition.z);
-        _rb.velocity = new Vector3
-            (0, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), 0) +
-             posDelta / Time.fixedDeltaTime;
-        jumping = true;
+        if (jumping || !_feet.isGrounded)
+        {
+            if (_rb.velocity.y > 0) floating = true;
+        }
+        else
+        {
+            Vector3 lateralDelta = new Vector3(_rb.position.x - lastGroundPosition.x, 0, _rb.position.z - lastGroundPosition.z);
+            _rb.velocity = new Vector3
+                (0, Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y), 0) +
+                 lateralDelta / 0.02f;
+            jumping = true;
+        }
     }
 
     void Land()

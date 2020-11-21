@@ -24,7 +24,7 @@ public class Conveyor : MonoBehaviour
     {
         if (active)
         {
-            mat.mainTextureOffset -= new Vector2(0f, speed * Time.fixedDeltaTime / tile);
+            mat.mainTextureOffset -= new Vector2(0f, speed / tile);
         }
     }
 

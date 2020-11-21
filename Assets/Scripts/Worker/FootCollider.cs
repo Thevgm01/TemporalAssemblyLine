@@ -17,12 +17,14 @@ public class FootCollider : MonoBehaviour
 
     void OnTriggerEnter(Collider c)
     {
+        if (c.isTrigger) return;
         _grounded++;
         if (isGrounded) landed?.Invoke();
     }
 
     void OnTriggerExit(Collider c)
     {
+        if (c.isTrigger) return;
         _grounded--;
     }
 

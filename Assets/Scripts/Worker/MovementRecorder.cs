@@ -3,6 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public struct FrameMovement
+{
+    public Quaternion look;
+    public Vector3 forceNextFrame;
+    public Vector3 position;
+    public float hMov;
+    public float vMov;
+    public float sprint;
+    public bool jump;
+    public bool grab;
+    public bool release;
+}
+
 public class MovementRecorder : MonoBehaviour
 {
     private enum State
@@ -14,21 +27,21 @@ public class MovementRecorder : MonoBehaviour
     private State state = State.Idle;
 
     Action CycleElapsed = delegate { };
+    Action Reset = delegate { };
 
-    PlayerController masterController;
+    WorkerBase masterController;
     Vector3 startPosition;
     List<ArtificialController> slaveControllers;
     List<FrameMovement> frameMovements;
-    int numFrames;
-    [SerializeField]
-    BoxSpawner boxSpawner = null;
-    [SerializeField]
-    BoxReceptacle boxReceptacle = null;
+    protected int numFrames;
+    [SerializeField] BoxSpawner boxSpawner = null;
+    [SerializeField] BoxReceptacle boxReceptacle = null;
+    [SerializeField] protected Door endDoor = null;
 
     [SerializeField]
     [Range(0f, 10f)]
     float secondsPerCopy = 3;
-    int framesPerCopy;
+    protected int framesPerCopy;
 
     [SerializeField]
     [Range(-1, 100)]
@@ -43,25 +56,35 @@ public class MovementRecorder : MonoBehaviour
     int grabFrameBuffer = 5;
 
     // Start is called before the first frame update
-    void Awake()
+    protected virtual void Awake()
     {
         if (boxSpawner != null)
         {
             boxSpawner.frequency = 0f;
             CycleElapsed += boxSpawner.Spawn;
+            Reset += boxSpawner.DestroyAll;
         }
         if (boxReceptacle != null)
         {
             boxReceptacle.boxReceived += BoxReceived;
         }
-
-        framesPerCopy = (int)(secondsPerCopy / Time.fixedDeltaTime);
+        if (endDoor != null)
+        {
+            endDoor.Opened += ResetAll;
+            Reset += endDoor.ResetCount;
+        }
 
         Lever lever = GetComponentInChildren<Lever>();
-        if (lever != null) lever.Pulled += Reset;
+        if (lever != null) lever.Pulled += ResetAll;
 
+        framesPerCopy = (int)(secondsPerCopy / Time.fixedDeltaTime);
+        CalculateSpawnParticlesOffset();
+    }
+
+    protected void CalculateSpawnParticlesOffset()
+    {
         var main = cloneParticles.GetComponent<ParticleSystem>().main;
-        framesToSpawnCloneParticles = (int)(60 * main.startLifetime.Evaluate(0));
+        framesToSpawnCloneParticles = framesPerCopy - (int)(60 * main.startLifetime.Evaluate(0)) + 10;
     }
 
     void NewMovement(FrameMovement frameMovement)
@@ -73,9 +96,9 @@ public class MovementRecorder : MonoBehaviour
     {
         if (state == State.Idle) return;
 
-        if ((slaveControllers.Count < maxCopies || maxCopies < 0))
+        if (slaveControllers.Count < maxCopies || maxCopies < 0)
         {
-            if (numFrames % framesPerCopy == framesPerCopy - framesToSpawnCloneParticles + 10)
+            if (numFrames % framesPerCopy == framesToSpawnCloneParticles)
             {
                 Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
             }
@@ -109,8 +132,9 @@ public class MovementRecorder : MonoBehaviour
         GameObject newSlave = Instantiate(masterController.gameObject);
         newSlave.name = "PlayerClone" + numFrames;
 
-        Destroy(newSlave.GetComponent<PlayerController>()); // Destroy old player controller
+        Destroy(newSlave.GetComponent<WorkerBase>()); // Destroy old controller
         slaveControllers.Insert(0, newSlave.AddComponent<ArtificialController>()); // Add artificial controller
+
         newSlave.GetComponent<Animator>().enabled = true; // Enable animator
 
         var avatar = newSlave.transform.Find("Worker");
@@ -135,7 +159,7 @@ public class MovementRecorder : MonoBehaviour
     {
         if(num > 0 && state == State.Recording)
         {
-            masterController.movementEvent -= NewMovement;
+            masterController.MovementEvent -= NewMovement;
             state = State.Looping;
         }
         else if(state == State.Looping)
@@ -144,22 +168,25 @@ public class MovementRecorder : MonoBehaviour
         }
     }
 
-    void Reset()
+    protected void ResetAll()
     {
         if (slaveControllers == null) return;
 
+        if (state == State.Recording) masterController.MovementEvent -= NewMovement;
+
         while (slaveControllers.Count > 0) DestroyLastClone();
-        boxSpawner.DestroyAll();
         frameMovements.Clear();
         state = State.Idle;
+
+        Reset?.Invoke();
     }
 
     void OnTriggerEnter(Collider other)
     {
         if(state == State.Idle && other.tag == "Player")
         {
-            masterController = other.GetComponent<PlayerController>();
-            masterController.movementEvent += NewMovement;
+            masterController = other.GetComponent<WorkerBase>();
+            masterController.MovementEvent += NewMovement;
 
             startPosition = other.transform.position;
 

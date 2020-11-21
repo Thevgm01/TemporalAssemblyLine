@@ -6,15 +6,15 @@ using System;
 public class BoxSpawner : MonoBehaviour
 {
     public GameObject box;
-    List<GameObject> spawnedBoxes;
+    protected List<GameObject> spawnedBoxes;
 
     public float frequency;
-    private float timer;
+    protected float timer;
 
     [SerializeField] GameObject destroyParticles;
 
     // Use this for initialization
-    void Start()
+    protected virtual void Awake()
     {
         timer = 0f;
         spawnedBoxes = new List<GameObject>();
@@ -33,23 +33,23 @@ public class BoxSpawner : MonoBehaviour
         }
     }
 
-    public void Spawn()
+    public virtual void Spawn()
     {
         var newBox = Instantiate(box, transform.position, transform.rotation);
         spawnedBoxes.Add(newBox);
-
-        while (spawnedBoxes[0] == null) spawnedBoxes.RemoveAt(0);
     }
 
     public void DestroyAll()
     {
         if (spawnedBoxes == null || spawnedBoxes.Count == 0) return;
 
-        while (spawnedBoxes[0] == null) spawnedBoxes.RemoveAt(0);
         while (spawnedBoxes.Count > 0)
         {
-            Instantiate(destroyParticles, spawnedBoxes[0].transform.position, Quaternion.identity);
-            Destroy(spawnedBoxes[0]);
+            if (spawnedBoxes[0] != null)
+            {
+                Instantiate(destroyParticles, spawnedBoxes[0].transform.position, Quaternion.identity);
+                Destroy(spawnedBoxes[0]);
+            }
             spawnedBoxes.RemoveAt(0);
         }
     }

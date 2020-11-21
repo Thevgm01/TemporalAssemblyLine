@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Door : MonoBehaviour
 {
-    public float openHeight = 4.9f;
+    public Action Opened = delegate { };
 
-    bool locked = false;
+    float closeHeight;
+    public float openHeight = 4.9f;
 
     ConfigurableJoint joint;
     public Lever lever;
@@ -15,14 +17,16 @@ public class Door : MonoBehaviour
     int _numBoxesToUnlock;
     int NumBoxes
     {
-        get { return _numBoxesToUnlock; }
+        get => _numBoxesToUnlock;
         set
         {
             _numBoxesToUnlock = value;
             ChangeBoxes();
         }
     }
+    bool Locked { get { return _numBoxesToUnlock > 0; } }
     int startNumBoxes;
+
     public BoxReceptacle boxReceptacle;
     TMPro.TextMeshPro doorText;
 
@@ -30,6 +34,8 @@ public class Door : MonoBehaviour
     void Awake()
     {
         joint = GetComponent<ConfigurableJoint>();
+        closeHeight = joint.anchor.y;
+
         doorText = transform.GetChild(0).GetComponentInChildren<TMPro.TextMeshPro>();
 
         if (lever == null) Debug.LogWarning("Door missing lever");
@@ -41,20 +47,28 @@ public class Door : MonoBehaviour
             boxReceptacle.boxReceived += BoxDeposit;
 
             startNumBoxes = NumBoxes;
-            locked = true;
             ChangeBoxes();
         }
     }
 
     void Open()
     {
-        if (locked)
-        {
-            return;
-        }
+        if (Locked) return;
 
         joint.anchor = new Vector3(0, openHeight, 0);
         joint.connectedBody.AddForce(Vector3.one / 1000f);
+        Opened?.Invoke();
+    }
+
+    public void Close()
+    {
+        if (Locked) return;
+
+        NumBoxes = startNumBoxes;
+
+        joint.anchor = new Vector3(0, closeHeight, 0);
+        joint.connectedBody.AddForce(Vector3.one / 1000f);
+        //Closed?.Invoke();
     }
 
     void BoxDeposit(int num)
@@ -62,25 +76,20 @@ public class Door : MonoBehaviour
         --NumBoxes;
     }
 
-    void Reset()
+    public void ResetCount()
     {
-        if(startNumBoxes > 0)
-        {
-            NumBoxes = startNumBoxes;
-            locked = true;
-        }
+        if(Locked) NumBoxes = startNumBoxes;
     }
 
     void ChangeBoxes()
     {
-        if(NumBoxes > 0)
+        if(Locked)
         {
             doorText.text = "Locked\n" + NumBoxes + (NumBoxes > 1 ? " boxes" : " box") + "\nremaining";
         }
         else
         {
             doorText.text = "Unlocked";
-            locked = false;
         }
     }
 }

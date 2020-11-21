@@ -3,32 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public struct FrameMovement
+public class PlayerController : WorkerBase
 {
-    public Quaternion look;
-    public Vector3 forceNextFrame;
-    public Vector3 position; 
-    public float hMov;
-    public float vMov;
-    public float sprint;
-    public bool jump;
-    public bool grab;
-    public bool release;
-}
-
-public class PlayerController : MonoBehaviour
-{
-    public Action<FrameMovement> movementEvent = delegate { };
     FrameMovement frameMovement;
 
     public Transform _camera;
-    Rigidbody _rb;
-    GrabController _grabber;
-    MovementController _movement;
-    Transform _head;
-    Collider _body;
-    FootCollider _feet;
-    Animator _animator;
 
     float lookAngleX = 0f;
     float lookAngleY = 0f;
@@ -37,19 +16,6 @@ public class PlayerController : MonoBehaviour
     public float lookSensetivity;
 
     public HandIconManager handIcon;
-
-    void Awake()
-    {
-        _rb = GetComponent<Rigidbody>();
-        _grabber = GetComponent<GrabController>();
-        _movement = GetComponent<MovementController>();
-        _body = GetComponent<Collider>();
-        _head = transform.Find("Head");
-        _feet = GetComponentInChildren<FootCollider>();
-        _animator = GetComponent<Animator>();
-
-        frameMovement = new FrameMovement();
-    }
 
     void Start()
     {
@@ -87,19 +53,14 @@ public class PlayerController : MonoBehaviour
             frameMovement.forceNextFrame += newMove * Time.deltaTime;
         }
 
-        if (_animator != null)
-        {
-            _animator.transform.rotation = Quaternion.Euler(0, _head.rotation.eulerAngles.y, 0);
-            _animator.SetFloat("vMov", Mathf.Lerp(_animator.GetFloat("vMov"), vMov, 0.05f));
-            _animator.SetFloat("hMov", Mathf.Lerp(_animator.GetFloat("hMov"), hMov, 0.05f));
-        }
+        SetAnimatorValues(hMov, vMov);
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
             _movement.Sprint();
         }
 
-        if (Input.GetKey(KeyCode.Space) && _feet.isGrounded)
+        if (Input.GetKey(KeyCode.Space))
         {
             _movement.Jump();
             frameMovement.jump = true;
@@ -115,7 +76,7 @@ public class PlayerController : MonoBehaviour
     {
         frameMovement.sprint = _movement.sprintTime;
         Vector3 tempForce = _movement.ApplyForces(frameMovement.forceNextFrame);
-        movementEvent?.Invoke(frameMovement);
+        MovementEvent?.Invoke(frameMovement);
         frameMovement = new FrameMovement();
         frameMovement.position = transform.position;
         frameMovement.forceNextFrame = tempForce;

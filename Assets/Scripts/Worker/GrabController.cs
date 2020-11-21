@@ -16,7 +16,10 @@ public class GrabController : MonoBehaviour
 
     [SerializeField]
     [Range(0f, 5f)]
-    float maxGrabDistance = 3f;
+    float maxGrabDistance = 4f;
+    [SerializeField]
+    [Range(0f, 5f)]
+    float holdDistance = 3f;
     [SerializeField]
     [Range(0f, 10f)]
     float maxGrabSpeed = 2f;
@@ -26,7 +29,7 @@ public class GrabController : MonoBehaviour
     public LayerMask grabLayer;
     public LayerMask geometryLayer;
 
-    private float holdDistance;
+    //private float lookDistance;
 
     private Rigidbody currentLookRB;
     private Rigidbody currentGrabRB;
@@ -56,7 +59,7 @@ public class GrabController : MonoBehaviour
 
             if (ray.collider != null) // Looking at an object in the grabbable layer
             {
-                holdDistance = Vector3.Distance(_head.position, ray.collider.transform.position);
+                //lookDistance = Vector3.Distance(_head.position, ray.collider.transform.position);
                 if (currentLookRB == null || // Wasn't looking at any object last frame, or...
                     ray.collider.gameObject != currentLookRB.gameObject) // Looking at a different object this frame)
                 {
@@ -95,12 +98,20 @@ public class GrabController : MonoBehaviour
                 currentGrabRB.MovePosition(Vector3.Lerp(currentGrabRB.position, desiredHoldPosition, 0.1f / currentGrabRB.mass)); // Move towards
             }
             */
+            if(Vector3.Distance(_head.position, currentGrabRB.position) > maxGrabDistance * 2)
+            {
+                Release();
+                return;
+            }
+
+            float speedMult = 0.02f / Time.fixedDeltaTime;
 
             Vector3 posDif = _head.position + (_head.forward * holdDistance) - currentGrabRB.position;
-            currentGrabRB.AddForce(posDif * posDif.sqrMagnitude * grabForce);
+            currentGrabRB.AddForce(posDif * posDif.sqrMagnitude * grabForce * speedMult);
 
-            if (currentGrabRB.velocity.magnitude > maxGrabSpeed)
-                currentGrabRB.velocity = currentGrabRB.velocity.normalized * maxGrabSpeed;
+            float grabSpeed = maxGrabSpeed * speedMult;
+            if (currentGrabRB.velocity.magnitude > grabSpeed)
+                currentGrabRB.velocity = currentGrabRB.velocity.normalized * grabSpeed;
 
             //armTarget.MoveRotation(Quaternion.Euler(0f, angleX, 0f));
 
@@ -159,10 +170,9 @@ public class GrabController : MonoBehaviour
     IEnumerator EnableCollisionsOnExit(Collider grabbedCollider)
     {
         while (_body.bounds.Intersects(grabbedCollider.bounds))
-        {
             yield return new WaitForSeconds(0.1f);
-        }
-        Physics.IgnoreCollision(_body, grabbedCollider.GetComponent<Collider>(), false);
-        Physics.IgnoreCollision(_feet, grabbedCollider.GetComponent<Collider>(), false);
+
+        Physics.IgnoreCollision(_body, grabbedCollider, false);
+        Physics.IgnoreCollision(_feet, grabbedCollider, false);
     }
 }
