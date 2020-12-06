@@ -152,12 +152,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9231b7e0593662b48b79cf24dcaa7434, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activateSound: {fileID: 8300000, guid: 0c1172d8472053044a3a442f2176c43c, type: 3}
+  resetSound: {fileID: 8300000, guid: ec1e1064e373b68409f57997c6a393ea, type: 3}
+  spawnSound: {fileID: 8300000, guid: 2ef212fe1969e4645a8c20b2cc792a22, type: 3}
+  framesToSpawnCloneSound: 200
+  destroySound: {fileID: 8300000, guid: d11ecb7722a99d042950293d38ba5575, type: 3}
   boxSpawner: {fileID: 0}
   boxReceptacle: {fileID: 0}
+  endDoor: {fileID: 0}
   secondsPerCopy: 3
   maxCopies: -1
-  cloneModel: {fileID: 919132149155446097, guid: bd3aab22ccc8eb24b86dd62160c15549,
-    type: 3}
   cloneParticles: {fileID: 2473260625566081582, guid: fdc980b904016a143886ff15cb442586,
     type: 3}
   deathParticles: {fileID: 2473260625566081582, guid: a2e7503217306fd4d9f0de5b707ee7b2,
@@ -4964,8 +4968,8 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 5c4c11a475ac89345ad62c4e07b31bd0, type: 2}
+  - {fileID: 2100000, guid: b75482009b9f8ee4cab53300343a1998, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5002,7 +5006,7 @@ ParticleSystemRenderer:
   m_UseCustomVertexStreams: 0
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
-  m_AllowRoll: 1
+  m_AllowRoll: 0
   m_VertexStreams: 00010304
   m_Mesh: {fileID: 0}
   m_Mesh1: {fileID: 0}

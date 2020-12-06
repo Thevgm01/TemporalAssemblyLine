@@ -68,7 +68,11 @@ public class PlayerController : WorkerBase
 
         if(Input.GetMouseButtonDown(0))
         {
-            _grabber.ToggleGrab();
+            _grabber.Grab();
+        }
+        else if(Input.GetMouseButtonUp(0))
+        {
+            _grabber.Release();
         }
     }
 

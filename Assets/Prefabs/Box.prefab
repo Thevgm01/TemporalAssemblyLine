@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 23001861849666344}
   - component: {fileID: 65850574217920286}
   - component: {fileID: 54289625406478192}
+  - component: {fileID: 9028123320353076823}
   m_Layer: 9
   m_Name: Box
   m_TagString: Box
@@ -110,3 +111,43 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &9028123320353076823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732540477792680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 823dd0fa545181a4380e2679e68e2d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  airWhooshes:
+  - {fileID: 8300000, guid: d3c598914439a5a4f8f1e4ccc1ffb2d1, type: 3}
+  - {fileID: 8300000, guid: 17f999b22b23aa04ebeffe2a716f9f7e, type: 3}
+  - {fileID: 8300000, guid: bddc1df20ab9f1444bebfa94aeca5306, type: 3}
+  - {fileID: 8300000, guid: 04f46e7095d6b0542baf39244c5e52a4, type: 3}
+  - {fileID: 8300000, guid: c817cbdce838f8f41b2cba21d8ca92ec, type: 3}
+  - {fileID: 8300000, guid: 8ac07f14970eb844f9b737969479dd7b, type: 3}
+  - {fileID: 8300000, guid: 9a15eafe198c7a94ca6045bea253e487, type: 3}
+  - {fileID: 8300000, guid: cbb8428976484794797c45c283dcc934, type: 3}
+  - {fileID: 8300000, guid: 1589e1eef58383a498afb224647926bb, type: 3}
+  - {fileID: 8300000, guid: f7fc2f9a7255eec43ad52233839c5601, type: 3}
+  impacts:
+  - {fileID: 8300000, guid: 1cbd417c685ec4e49a79a0802d675e6c, type: 3}
+  - {fileID: 8300000, guid: 5ca7acd5f153b784c91d8613c8563871, type: 3}
+  - {fileID: 8300000, guid: 0d543e8f811ce134aa9106ad78334803, type: 3}
+  - {fileID: 8300000, guid: 945f1650157b8064fa1f8447b6293f73, type: 3}
+  - {fileID: 8300000, guid: d99c23cacd3301746af6714a9a011ef7, type: 3}
+  - {fileID: 8300000, guid: 4b242e2cf1b6b2b4281d0a82175fc426, type: 3}
+  - {fileID: 8300000, guid: 41687c7189e2d7e4eb75222b9ea89572, type: 3}
+  - {fileID: 8300000, guid: b22dff1945ddd5447a8f2b11f8c070c5, type: 3}
+  - {fileID: 8300000, guid: 26778090d43905b49b2f6b48edcd652d, type: 3}
+  - {fileID: 8300000, guid: 9835adf6924afda438f057eb3391dafe, type: 3}
+  - {fileID: 8300000, guid: 3de0c7466c4cc1c4991bbf1c7dadc1bf, type: 3}
+  - {fileID: 8300000, guid: f96344dfc38dbed4bbd230239c50a0ff, type: 3}
+  - {fileID: 8300000, guid: fbbfdb74e9e71694d8d738b16763a51c, type: 3}
+  - {fileID: 8300000, guid: 70c36c28724b65a41afb4e4fb29bb775, type: 3}
+  - {fileID: 8300000, guid: b45d2684ed9cdf8448fadfd230a63c3f, type: 3}
+  airWhooshSpeed: 8

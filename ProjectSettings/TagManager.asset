@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Box
   - Lever
+  - Character
   layers:
   - Default
   - TransparentFX

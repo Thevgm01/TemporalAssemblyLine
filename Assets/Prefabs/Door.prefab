@@ -95,6 +95,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeb3485d42f447f47a3df64d078dfb52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unlockProgressSound: {fileID: 8300000, guid: 128a54a93f2d1924f98fc74045f78448, type: 3}
+  unlockSound: {fileID: 8300000, guid: b2600e0ad1989054c93d78bb5d4c708e, type: 3}
+  resetSound: {fileID: 8300000, guid: 463d825e49e5ad4468176821cd8ffc12, type: 3}
+  openSound: {fileID: 8300000, guid: 0062f68d0b56cd141994657fe78f1e74, type: 3}
+  closeSound: {fileID: 8300000, guid: eed289fb2f41fe440a3a8594e6d7c1d4, type: 3}
   openHeight: 4.9
   lever: {fileID: 0}
   _numBoxesToUnlock: 0

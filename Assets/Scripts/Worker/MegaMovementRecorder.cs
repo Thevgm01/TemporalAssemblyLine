@@ -6,6 +6,7 @@ public class MegaMovementRecorder : MovementRecorder
 {
     Door[] allDoors;
     public MeshRenderer[] meshesToDisable;
+    public GameObject quitMessage;
 
     // Start is called before the first frame update
     protected override void Awake()
@@ -38,5 +39,7 @@ public class MegaMovementRecorder : MovementRecorder
         {
             if (mr) mr.enabled = false;
         }
+
+        quitMessage.SetActive(true);
     }
 }

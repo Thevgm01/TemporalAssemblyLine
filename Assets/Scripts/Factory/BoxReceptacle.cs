@@ -5,6 +5,8 @@ using System;
 
 public class BoxReceptacle : MonoBehaviour
 {
+    [SerializeField] AudioClip receivedSound;
+
     public Action<int> boxReceived = delegate { };
 
     public LayerMask boxLayer;
@@ -27,6 +29,7 @@ public class BoxReceptacle : MonoBehaviour
             boxReceived?.Invoke(numBoxesReceived);
             Instantiate(boxReceivedParticles, other.transform.position, Quaternion.identity);
             Destroy(other.gameObject);
+            AudioHelper.PlayClip(receivedSound, 1f, 1f, transform);
         }
     }
 }

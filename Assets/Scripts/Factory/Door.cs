@@ -5,6 +5,12 @@ using System;
 
 public class Door : MonoBehaviour
 {
+    [SerializeField] AudioClip unlockProgressSound;
+    [SerializeField] AudioClip unlockSound;
+    [SerializeField] AudioClip resetSound;
+    [SerializeField] AudioClip openSound;
+    [SerializeField] AudioClip closeSound;
+
     public Action Opened = delegate { };
 
     float closeHeight;
@@ -21,6 +27,7 @@ public class Door : MonoBehaviour
         set
         {
             _numBoxesToUnlock = value;
+            if (_numBoxesToUnlock == 0) Unlock();
             ChangeBoxes();
         }
     }
@@ -58,6 +65,7 @@ public class Door : MonoBehaviour
         joint.anchor = new Vector3(0, openHeight, 0);
         joint.connectedBody.AddForce(Vector3.one / 1000f);
         Opened?.Invoke();
+        AudioHelper.PlayClip(openSound, 1f, 1f, transform);
     }
 
     public void Close()
@@ -69,6 +77,12 @@ public class Door : MonoBehaviour
         joint.anchor = new Vector3(0, closeHeight, 0);
         joint.connectedBody.AddForce(Vector3.one / 1000f);
         //Closed?.Invoke();
+        AudioHelper.PlayClip(closeSound, 1f, 1f, transform);
+    }
+
+    void Unlock()
+    {
+        AudioHelper.PlayClip(unlockSound);
     }
 
     void BoxDeposit(int num)
@@ -78,7 +92,11 @@ public class Door : MonoBehaviour
 
     public void ResetCount()
     {
-        if(Locked) NumBoxes = startNumBoxes;
+        if (Locked && NumBoxes != startNumBoxes)
+        {
+            NumBoxes = startNumBoxes;
+            AudioHelper.PlayClip(resetSound);
+        }
     }
 
     void ChangeBoxes()
@@ -86,6 +104,7 @@ public class Door : MonoBehaviour
         if(Locked)
         {
             doorText.text = "Locked\n" + NumBoxes + (NumBoxes > 1 ? " boxes" : " box") + "\nremaining";
+            AudioHelper.PlayClip(unlockProgressSound, 0.5f, Mathf.Lerp(0.8f, 0.2f, (float)(NumBoxes - 1) / startNumBoxes));
         }
         else
         {

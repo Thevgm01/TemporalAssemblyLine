@@ -18,6 +18,11 @@ public struct FrameMovement
 
 public class MovementRecorder : MonoBehaviour
 {
+    [SerializeField] AudioClip activateSound;
+    [SerializeField] AudioClip resetSound;
+    [SerializeField] AudioClip spawnSound;
+    [SerializeField] AudioClip destroySound;
+
     private enum State
     {
         Idle,
@@ -96,16 +101,21 @@ public class MovementRecorder : MonoBehaviour
     {
         if (state == State.Idle) return;
 
-        if (slaveControllers.Count < maxCopies || maxCopies < 0)
+        if (numFrames % framesPerCopy == framesToSpawnCloneParticles)
         {
-            if (numFrames % framesPerCopy == framesToSpawnCloneParticles)
-            {
-                Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
-            }
-            else if (numFrames % framesPerCopy == 0 && numFrames > 0)
+            Instantiate(cloneParticles, startPosition + new Vector3(0, 1, 0), Quaternion.identity);
+            AudioHelper.PlayClip(spawnSound, 0.3f, 1f, transform);
+        }
+        else if (numFrames % framesPerCopy == 0 && numFrames > 0)
+        {
+            if (slaveControllers.Count < maxCopies || maxCopies < 0)
             {
                 ClonePlayer();
                 CycleElapsed?.Invoke();
+            }
+            else
+            {
+                ResetAll();
             }
         }
 
@@ -150,6 +160,7 @@ public class MovementRecorder : MonoBehaviour
     {
         ArtificialController lastController = slaveControllers[slaveControllers.Count - 1];
         Instantiate(deathParticles, lastController.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+        AudioHelper.PlayClip(destroySound, 1f, 1f, lastController.transform);
         lastController.UpdateFromRecordedMovement(new FrameMovement { release = true });
         Destroy(lastController.gameObject);
         slaveControllers.RemoveAt(slaveControllers.Count - 1);
@@ -173,6 +184,7 @@ public class MovementRecorder : MonoBehaviour
         if (slaveControllers == null) return;
 
         if (state == State.Recording) masterController.MovementEvent -= NewMovement;
+        if (state != State.Idle) AudioHelper.PlayClip(resetSound, 1f, 1f, transform);
 
         while (slaveControllers.Count > 0) DestroyLastClone();
         frameMovements.Clear();
@@ -183,7 +195,7 @@ public class MovementRecorder : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if(state == State.Idle && other.tag == "Player")
+        if (state == State.Idle && other.tag == "Player")
         {
             masterController = other.GetComponent<WorkerBase>();
             masterController.MovementEvent += NewMovement;
@@ -194,8 +206,10 @@ public class MovementRecorder : MonoBehaviour
             frameMovements = new List<FrameMovement>();
             CycleElapsed?.Invoke();
 
-            numFrames = 0;
+            numFrames = 1;
             state = State.Recording;
+
+            AudioHelper.PlayClip(activateSound, 1f, 1f, transform);
         }
     }
 }
