@@ -5,6 +5,8 @@ using System;
 
 public class PlayerController : WorkerBase
 {
+    [SerializeField] AudioClip[] footstepSounds;
+
     FrameMovement frameMovement;
 
     public Transform _camera;
@@ -16,6 +18,9 @@ public class PlayerController : WorkerBase
     public float lookSensetivity;
 
     public HandIconManager handIcon;
+
+    float totalMovement = 0;
+    [SerializeField] float distancePerStep = 1;
 
     void Start()
     {
@@ -51,6 +56,13 @@ public class PlayerController : WorkerBase
             frameMovement.hMov += hMov;
             frameMovement.vMov += vMov;
             frameMovement.forceNextFrame += newMove * Time.deltaTime;
+
+            totalMovement += newMove.magnitude * Time.deltaTime;
+            if(_feet.isGrounded && totalMovement >= distancePerStep)
+            {
+                AudioHelper.PlayRandomClipFromArray(footstepSounds, 0.2f, 1f);
+                totalMovement = 0;
+            }
         }
 
         SetAnimatorValues(hMov, vMov);
